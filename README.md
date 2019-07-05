@@ -1,4 +1,4 @@
-#Using sql and jsp files, We made a web site where students can enroll in courses. (also professor)
+#Using sql and jsp files, We made a portal for student and professor.
 
 <br>
 <br>
