@@ -1,4 +1,5 @@
-#DataBaseProgramming
+#Using sql and jsp files, We made a web site where students can enroll in courses (also professor)
+
 <br>
 <br>
 <img width="600" src="https://user-images.githubusercontent.com/35582991/60696408-92130280-9f20-11e9-837c-1403397c5426.png">
