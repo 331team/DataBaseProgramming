@@ -20,13 +20,13 @@ BEGIN
   IF (nBlank!=0)
     THEN RAISE invalid_value;
   END IF;
-	/* Ã¤¿ö ³ÖÀÚ */
+	/* ì±„ì›Œ ë„£ìž */
 	
   EXCEPTION
     WHEN underflow_length THEN
-      RAISE_APPLICATION_ERROR(-20002, '¾ÏÈ£ ±æÀÌ ÂªÀ½');
+      RAISE_APPLICATION_ERROR(-20002, 'ì•”í˜¸ ê¸¸ì´ ì§§ìŒ');
     WHEN invalid_value THEN
-      RAISE_APPLICATION_ERROR(-20003,  '¾ÏÈ£ °ø¶õ Á¸Àç');
+      RAISE_APPLICATION_ERROR(-20003,  'ì•”í˜¸ ê³µëž€ ì¡´ìž¬');
     WHEN OTHERS THEN 
       DBMS_OUTPUT.PUT_LINE(SQLERRM);
       
