@@ -1,9 +1,10 @@
-#Using sql and jsp files, We made a web site where students can enroll in courses (also professor)
+#Using sql and jsp files, We made a web site where students can enroll in courses. (also professor)
 
 <br>
 <br>
 <img width="600" src="https://user-images.githubusercontent.com/35582991/60696408-92130280-9f20-11e9-837c-1403397c5426.png">
 <br>
+#screenshot
 <img width="600" src="https://user-images.githubusercontent.com/35582991/60696413-9c350100-9f20-11e9-91fb-6f16282eb8cc.png">
 <br>
 <img width="600" src="https://user-images.githubusercontent.com/35582991/60696422-af47d100-9f20-11e9-8674-3b0fd4a07e83.png">
