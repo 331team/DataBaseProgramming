@@ -104,21 +104,21 @@ catch(SQLException ex){
 <button type='submit'>검색</button>
 </FORM>
 		...
-String mySQL = "SELECT c.c_id, c.c_id_no, c.c_name, c.c_unit, p.p_name, t.t_day, t.t_startTime, t.t_endTime, t.t_where FROM course c, teach t, professor p WHERE c.c_id = t.c_id AND c.c_id_no = t.c_id_no AND c.c_id=t.c_id AND p.p_id = t.p_id AND (c.c_id, c.c_id_no) NOT IN (SELECT c_id, c_id_no FROM enroll WHERE s_id = '" + session_id + "')";
+<% String mySQL = "SELECT c.c_id, c.c_id_no, c.c_name, c.c_unit, p.p_name, t.t_day, t.t_startTime, t.t_endTime, t.t_where FROM course c, teach t, professor p WHERE c.c_id = t.c_id AND c.c_id_no = t.c_id_no AND c.c_id=t.c_id AND p.p_id = t.p_id AND (c.c_id, c.c_id_no) NOT IN (SELECT c_id, c_id_no FROM enroll WHERE s_id = '" + session_id + "')";
 if(index!=0){ // '전체'가 아닌 경우 - 학과별 검색
 	mySQL = mySQL + " AND p.p_major='" + major[index] + "'";
-}
+} %>
  ```
 ![](https://user-images.githubusercontent.com/35582991/60696450-d1d9ea00-9f20-11e9-9091-7f28640eb8b8.png)
 InsertEnroll 프로시저 사용해 예외 처리
 ```java
-CallableStatement cstmt = myConn.prepareCall("{call InsertEnroll(?,?,?,?)}");
+CallableStatement cstmt = myConn.prepareCall("{call InsertEnroll(?,?,?,?)}");	// 프로시저 사용
 cstmt.setString(1, session_id);
 cstmt.setString(2, c_id);
 cstmt.setInt(3, Integer.parseInt(c_id_no));
 cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
 cstmt.execute();
-result = cstmt.getString(4);
+result = cstmt.getString(4);							// output
 ```
 ---
 > ### 강의 개설
@@ -147,7 +147,68 @@ result = cstmt.getString(4);
 #### updateCourse.jsp / updateCourse_verify.jsp
 ![](https://user-images.githubusercontent.com/35582991/60696541-1d8c9380-9f21-11e9-9fb6-821b9ff7bfa9.png)
 
+```java
+String sql1 = "{call insertCourse(?,?,?,?,?)}";
+String sql2 = "{call insertCourseVerify(?,?,?,?,?,?,?,?,?)}";
+CallableStatement cstmt = myConn.prepareCall(sql1);
+try{
+			... 								// parameter setting
+		cstmt.execute();
+		c_id = cstmt.getString(4); 
+		c_id_no = cstmt.getInt(5); 
+		System.out.println("c_id: " + c_id + "c_id_no : " + c_id_no);
+		cstmt = myConn.prepareCall(sql2);
+			...									// parameter setting
+		cstmt.setInt(8, max);
+		cstmt.registerOutParameter(9, java.sql.Types.VARCHAR);
+		cstmt.execute();
+		result = cstmt.getString(9); 
+		if(!result.equals("강의 개설이 완료되었습니다") || class_day=="" || start=="" || end=="" || where=="" || max==0){		// error 처리
+			System.out.print("delete");
+			PreparedStatement pstmt = myConn.prepareStatement("DELETE FROM teach WHERE c_id=? AND c_id_no=?");
+			pstmt.setString(1, c_id);
+			pstmt.setInt(2, c_id_no);
+			pstmt.execute();
+			pstmt = myConn.prepareStatement("DELETE FROM course WHERE c_id=? AND c_id_no=?");			// 강의 삭제
+			pstmt.setString(1, c_id);
+			pstmt.setInt(2, c_id_no);
+			pstmt.execute();
+		}
+}
+```
 ---
 > ### 시간표
 #### student_time_table.jsp / professor_time_table.jsp
 ![](https://user-images.githubusercontent.com/35582991/60696546-25e4ce80-9f21-11e9-96b5-5ec8836a4c18.png)
+수강신청 되어 있는 강의 enroll table에서 불러오기
+해당 강의 시간에 맞게 배치
+```java
+<% String mySQL = "select * from enroll where s_id = '" + studentID + "' and e_year = " + year + " and e_semester = " + semester;
+ResultSet myResultSet = stmt.executeQuery(mySQL);
+
+while(myResultSet.next() != false){
+  	...  
+  mySQL2 = "select * from teach where c_id='" + c_id + "' and c_id_no = '" + c_id_no + "' and t_year = " + year + " and t_semester = " + semester;
+  myResultSet2 = stmt2.executeQuery(mySQL2);
+  if(myResultSet2.next()){
+     t_day =  myResultSet2.getString("t_day");
+     t_startTime =  myResultSet2.getString("t_startTime");
+     t_endTime =  myResultSet2.getString("t_endTime");
+     t_where =  myResultSet2.getString("t_where");
+  }else{
+     %>teach table을 불러올 수 없음<%
+     break;
+  }
+	...
+  for(int i=0; i<len; i+=1){	// 해당 시간에 강의 채우기
+     int dayPos = 20 + 120*getDayValue(t_day.substring(i, i+1));
+     %><div class="course" style="top:<%=startPos%>px; left:<%=dayPos%>px; height:<%=height%>px; 
+     background-color:<%=color[totalEnrolledClass%8]%>">
+        <br><%=c_name%><br><%=t_where%><br><%=t_startTime%><br><%=t_endTime%>
+     </div><%
+  }
+  totalEnrolledClass += 1;
+  totalEnrolledUnit += c_unit;		// 총 이수 학점
+}
+%> 
+```
